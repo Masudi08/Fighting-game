@@ -2,7 +2,7 @@ import pygame
 pygame.init()
 win=pygame.display.set_mode((1280,720))
 pygame.display.set_caption("NO HARD FEELINGS😁😁")
-pygame.mixer.music.load("CHINJE.mp3")
+pygame.mixer.music.load("pedal_point_loop.mp3")
 bg_Front=pygame.image.load("FRONT.png").convert_alpha()
 bg_front=pygame.transform.scale(bg_Front,(1280,720))
 walkright=[pygame.image.load("BattingGirl_Walk1.png").convert_alpha(),pygame.image.load("BattingGirl_Walk2.png").convert_alpha(),pygame.image.load("BattingGirl_Walk3.png").convert_alpha(),pygame.image.load("BattingGirl_Walk4.png").convert_alpha(),pygame.image.load("BattingGirl_Walk5.png").convert_alpha(),pygame.image.load("BattingGirl_Walk6.png").convert_alpha()]
@@ -23,6 +23,7 @@ bg_Middle=pygame.image.load("MIDDLE.png").convert_alpha()
 bg_middle=pygame.transform.scale(bg_Middle,(1280,720))
 bg_Light=pygame.image.load("LIGHT.png").convert_alpha()
 bg_light=pygame.transform.scale(bg_Light,(1280,720))
+
 class Fighter:
     def __init__(self,x,y,vel):
         self.x=x
@@ -43,6 +44,7 @@ class Fighter:
         self.bat=False
         self.battingcount=0
     def draw(self):
+        pygame.draw.rect(win,(255,255,255),(self.x+25,self.y+23,30,70))
         if self.jumpingcount>=32:
                 self.jumpingcount=0
         if self.walkcount>=24:
@@ -90,6 +92,57 @@ class Fighter:
             else:
                 win.blit(standleft,(self.x,self.y))
 
+enemy_Attackright=[pygame.image.load("Attack__000.png").convert_alpha(),pygame.image.load("Attack__001.png").convert_alpha(),pygame.image.load("Attack__002.png").convert_alpha(),pygame.image.load("Attack__003.png").convert_alpha(),pygame.image.load("Attack__004.png").convert_alpha(),pygame.image.load("Attack__005.png").convert_alpha(),pygame.image.load("Attack__006.png").convert_alpha(),pygame.image.load("Attack__007.png").convert_alpha(),pygame.image.load("Attack__008.png").convert_alpha(),pygame.image.load("Attack__009.png").convert_alpha()]
+enemy_attackright=[pygame.transform.scale(frame,(50,70)) for frame in enemy_Attackright]
+enemy_attackleft=[pygame.transform.flip(frame,True,False) for frame in enemy_attackright]
+enemy_Idleright=[pygame.image.load("Idle__000.png").convert_alpha(),pygame.image.load("Idle__001.png").convert_alpha(),pygame.image.load("Idle__002.png").convert_alpha(),pygame.image.load("Idle__003.png").convert_alpha(),pygame.image.load("Idle__005.png").convert_alpha(),pygame.image.load("Idle__006.png").convert_alpha(),pygame.image.load("Idle__007.png").convert_alpha(),pygame.image.load("Idle__008.png").convert_alpha(),pygame.image.load("Idle__009.png").convert_alpha()]
+enemy_idleright=[pygame.transform.scale(frame,(50,70)) for frame in enemy_Idleright]
+enemy_idleleft=[pygame.transform.flip(frame,True,False) for frame in enemy_idleright]
+enemy_Run=[pygame.image.load("Run__000.png").convert_alpha(),pygame.image.load("Run__001.png").convert_alpha(),pygame.image.load("Run__002.png").convert_alpha(),pygame.image.load("Run__003.png").convert_alpha(),pygame.image.load("Run__004.png").convert_alpha(),pygame.image.load("Run__005.png").convert_alpha(),pygame.image.load("Run__006.png").convert_alpha(),pygame.image.load("Run__007.png").convert_alpha(),pygame.image.load("Run__008.png").convert_alpha(),pygame.image.load("Run__009.png").convert_alpha(),]
+enemy_run=[pygame.transform.scale(frame,(30,70))for frame in enemy_Run]
+enemy_runleft=[pygame.transform.flip(frame,True,False) for frame in enemy_run]
+class Enemy:
+    def __init__(self,x,y,vel):
+        self.y=y
+        self.x=x
+        self.vel=vel
+        self.attack=False
+        self.attack_count=0
+        self.idle=True
+        self.idlecount=0
+        self.facing="right"
+        self.run=False
+        self.runcount=0
+    def draw_enemy(self):
+        pygame.draw.rect(win,(255,255,255),(self.x,self.y,25,70))
+        if self.attack_count>=36:
+            self.attack_count=0
+        if self.idlecount>=36:
+            self.idlecount=0
+        if self.runcount>=36:
+            self.runcount=0
+        if self.idle==True and self.facing=="right":
+            win.blit(enemy_idleright[self.idlecount//4],(self.x,self.y))
+            enemy.idlecount+=1
+        elif self.idle==True and self.facing=="left":
+            win.blit(enemy_idleleft[self.idlecount//4],(self.x,self.y))  
+            enemy.idlecount+=1
+        elif self.attack==True and self.facing=="right":
+            win.blit(enemy_attackright[self.attack_count//4],(self.x,self.y))
+            enemy.attack_count+=1
+        elif self.attack==True and self.facing=="left":
+            win.blit(enemy_attackleft[self.attack_count//4],(self.x,self.y))
+            enemy.attack_count+=1
+        elif self.run==True and self.facing=="right":
+            win.blit(enemy_run[self.runcount//4],(self.x,self.y)) 
+            enemy.runcount+=1
+        elif self.run==True and self.facing=="left":
+            win.blit(enemy_runleft[self.runcount//4],(self.x,self.y)) 
+            enemy.runcount+=1
+        
+        
+
+    
 
 
 running=True
@@ -99,9 +152,11 @@ def update_display():
     win.blit(bg_front,(0,0)) 
     win.blit(bg_light,(0,0))
     fighter.draw()
+    enemy.draw_enemy()
     pygame.display.update()
 clock=pygame.time.Clock()  
-fighter=Fighter(50,620,2)
+fighter=Fighter(50,620,3)
+enemy=Enemy(800,645,1)
 pygame.mixer.music.play(-1)
 while running:
     clock.tick(60)
@@ -122,7 +177,7 @@ while running:
         fighter.right=True
         fighter.left=False
         fighter.facing="right"
-        if fighter.x<1024-fighter.vel-walkright[0].get_width():
+        if fighter.x<1280-fighter.vel-walkright[0].get_width():
             fighter.x+=fighter.vel
             if key[pygame.K_RSHIFT]:
                 fighter.x+=6
@@ -158,5 +213,27 @@ while running:
         fighter.punch=False
         fighter.kick=False
         fighter.bat=False    
+    enemy.attack=False
+    enemy.run=False
+    enemy.idle=False
+    if fighter.x<enemy.x:
+        enemy.facing="left"
+        if enemy.x-fighter.x>50:
+            enemy.run=True
+            enemy.x-=enemy.vel
+        if enemy.x-fighter.x<70:
+            enemy.attack=True    
+    elif fighter.x>enemy.x:
+        enemy.facing="right"
+        if fighter.x-enemy.x>50:
+            enemy.run=True
+            enemy.x+=enemy.vel
+        if fighter.x-enemy.x<70:
+            enemy.attack=True
+            
+    else:
+        enemy.attack=False
+        enemy.run=False
+        enemy.idle=True
     update_display()
 pygame.quit()
