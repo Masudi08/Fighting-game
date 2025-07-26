@@ -131,6 +131,9 @@ enemy_idleleft=[pygame.transform.flip(frame,True,False) for frame in enemy_idler
 enemy_Run=[pygame.image.load("Run__000.png").convert_alpha(),pygame.image.load("Run__001.png").convert_alpha(),pygame.image.load("Run__002.png").convert_alpha(),pygame.image.load("Run__003.png").convert_alpha(),pygame.image.load("Run__004.png").convert_alpha(),pygame.image.load("Run__005.png").convert_alpha(),pygame.image.load("Run__006.png").convert_alpha(),pygame.image.load("Run__007.png").convert_alpha(),pygame.image.load("Run__008.png").convert_alpha(),pygame.image.load("Run__009.png").convert_alpha(),]
 enemy_run=[pygame.transform.scale(frame,(30,70))for frame in enemy_Run]
 enemy_runleft=[pygame.transform.flip(frame,True,False) for frame in enemy_run]
+enemy_Deadright=[pygame.image.load("Dead__000.png").convert_alpha(),pygame.image.load("Dead__001.png").convert_alpha(),pygame.image.load("Dead__002.png").convert_alpha(),pygame.image.load("Dead__003.png").convert_alpha(),pygame.image.load("Dead__004.png").convert_alpha(),pygame.image.load("Dead__005.png").convert_alpha(),pygame.image.load("Dead__006.png").convert_alpha(),pygame.image.load("Dead__007.png").convert_alpha(),pygame.image.load("Dead__008.png").convert_alpha(),pygame.image.load("Dead__009.png").convert_alpha()]
+enemy_deadright=[pygame.transform.scale(frame,(50,70)) for frame in enemy_Deadright]
+enemy_deadleft=[pygame.transform.flip(frame,True,False) for frame in enemy_deadright]
 jumpAttack_right=[pygame.image.load("Jump_Attack__000.png").convert_alpha(),pygame.image.load("Jump_Attack__001.png").convert_alpha(),pygame.image.load("Jump_Attack__002.png").convert_alpha(),pygame.image.load("Jump_Attack__003.png").convert_alpha(),pygame.image.load("Jump_Attack__004.png").convert_alpha(),pygame.image.load("Jump_Attack__005.png").convert_alpha(),pygame.image.load("Jump_Attack__006.png").convert_alpha(),pygame.image.load("Jump_Attack__007.png").convert_alpha(),pygame.image.load("Jump_Attack__008.png").convert_alpha(),pygame.image.load("Jump_Attack__009.png").convert_alpha()]
 jumpattack_right=[pygame.transform.scale(frame,(30,70))for frame in jumpAttack_right]
 jumpattack_left=[pygame.transform.flip(frame,True,False)for frame in jumpattack_right]
@@ -154,12 +157,16 @@ class Enemy:
         self.attacktime=0
         self.isjumping=False
         self.hit=False
-        self.health=20
         self.hitbox=[self.x,self.y,45,70]
+        self.hitwidth=70
+        self.dead=False
+        self.deadcount=0
+        self.visible=True
     
 
     def draw_enemy(self):
-        pygame.draw.rect(win,(255,255,255),(self.x,self.y,45,70))
+        pygame.draw.rect(win,(255,0,0),(self.x-25,self.y-10,70,10))
+        pygame.draw.rect(win,(0,255,0),(self.x-25,self.y-10,self.hitwidth,10))
         if self.attack_count>=40:
             self.attack=False
             self.currentattack=None
@@ -174,45 +181,57 @@ class Enemy:
             self.currentattack=None
             self.y=self.startjump
             self.jumpattackcount=0
-
-        if self.attack==True and self.facing=="right":
-            win.blit(enemy_attackright[self.attack_count//4],(self.x,self.y))
-            self.attack_count+=1
-        elif self.attack==True and self.facing=="left":
-            win.blit(enemy_attackleft[self.attack_count//4],(self.x,self.y))
-            self.attack_count+=1
-        elif self.jumpattack==True and self.facing=="right":
-            self.jump()
-            win.blit(jumpattack_right[self.jumpattackcount//4],(self.x,self.y))
-            self.jumpattackcount+=1
-        elif self.jumpattack==True and self.facing=="left":
-            self.jump()
-            win.blit(jumpattack_left[self.jumpattackcount//4],(self.x,self.y))
-            self.jumpattackcount+=1
-        elif self.run==True and self.facing=="right":
-            win.blit(enemy_run[self.runcount//4],(self.x,self.y)) 
-            self.runcount+=1
-        elif self.run==True and self.facing=="left":
-            win.blit(enemy_runleft[self.runcount//4],(self.x,self.y)) 
-            self.runcount+=1
-        else:
-            if self.idle==True and self.facing=="right":
-                win.blit(enemy_idleright[self.idlecount//4],(self.x,self.y))
-                self.idlecount+=1
-            elif self.idle==True and self.facing=="left":
-                win.blit(enemy_idleleft[self.idlecount//4],(self.x,self.y))  
-                self.idlecount+=1
-    def jump(self):
-        if self.isjumping==True:
-            if self.jumpcount>-10:
-                neg=1
-                if self.jumpcount<1:
-                    neg=-1
-                self.y-=(enemy.jumpcount**2*0.5)*neg
-                self.jumpcount-=1
+        if self.deadcount>=40:
+            self.deadcount=0
+        
+        if self.visible==True:
+            if self.attack==True and self.facing=="right":
+                win.blit(enemy_attackright[self.attack_count//4],(self.x,self.y))
+                self.attack_count+=1
+            elif self.attack==True and self.facing=="left":
+                win.blit(enemy_attackleft[self.attack_count//4],(self.x,self.y))
+                self.attack_count+=1
+            elif self.jumpattack==True and self.facing=="right":
+                self.jump()
+                win.blit(jumpattack_right[self.jumpattackcount//4],(self.x,self.y))
+                self.jumpattackcount+=1
+            elif self.jumpattack==True and self.facing=="left":
+                self.jump()
+                win.blit(jumpattack_left[self.jumpattackcount//4],(self.x,self.y))
+                self.jumpattackcount+=1
+            elif self.run==True and self.facing=="right":
+                win.blit(enemy_run[self.runcount//4],(self.x,self.y)) 
+                self.runcount+=1
+            elif self.run==True and self.facing=="left":
+                win.blit(enemy_runleft[self.runcount//4],(self.x,self.y)) 
+                self.runcount+=1
+            elif self.dead==True and self.facing=="right":
+                if self.deadcount//4<=10:
+                    win.blit(enemy_deadright[self.deadcount//4],(self.x,self.y))
+                self.deadcount+=1
+            elif self.dead==True and self.facing=="left":
+                if self.deadcount//4<=10:
+                    win.blit(enemy_deadleft[self.deadcount//4],(self.x,self.y))
+                self.deadcount+=1
             else:
-                self.jumpcount=10
-                self.y=enemy.startjump
+                if self.idle==True and self.facing=="right":
+                    win.blit(enemy_idleright[self.idlecount//4],(self.x,self.y))
+                    self.idlecount+=1
+                elif self.idle==True and self.facing=="left":
+                    win.blit(enemy_idleleft[self.idlecount//4],(self.x,self.y))  
+                    self.idlecount+=1
+    def jump(self):
+        if self.visible==True:
+            if self.isjumping==True:
+                if self.jumpcount>-10:
+                    neg=1
+                    if self.jumpcount<1:
+                        neg=-1
+                    self.y-=(enemy.jumpcount**2*0.5)*neg
+                    self.jumpcount-=1
+                else:
+                    self.jumpcount=10
+                    self.y=enemy.startjump
         
 
     
@@ -220,12 +239,20 @@ class Enemy:
 
 running=True
 def update_display():
-    win.blit(bg_back,(0,0))
-    win.blit(bg_middle,(0,0))
-    win.blit(bg_front,(0,0)) 
-    win.blit(bg_light,(0,0))
-    fighter.draw()
-    enemy.draw_enemy()
+    if enemy.visible==True:
+        enemydown=font1.render("YOU WIN",1,(0,0,0))
+        win.blit(bg_back,(0,0))
+        win.blit(bg_middle,(0,0))
+        win.blit(bg_front,(0,0)) 
+        win.blit(bg_light,(0,0))
+        fighter.draw()
+        enemy.draw_enemy()
+        if game_over==True:
+            if time.time()-hittime<=hittime_limit:
+                win.blit(enemydown,(640-50,360-50))
+    else:
+        restart=font1.render("PRESS R TO RESTART",1,(255,255,255))
+        win.blit(restart,(360,360-50))
     pygame.display.update()
 clock=pygame.time.Clock()  
 fighter=Fighter(50,620,3)
@@ -233,6 +260,11 @@ enemy=Enemy(800,645,1)
 pygame.mixer.music.play(-1)
 attackcooldown=2
 battingcooldown=2
+game_over=False
+hittime_limit=3
+currenttime=0
+hittime=0
+font1=pygame.font.SysFont('comicsans',50,True,True)
 while running:
     clock.tick(60)
     for event in pygame.event.get():
@@ -293,13 +325,13 @@ while running:
 
     if fighter.facing=="right" and fighter.x+fighter.hitboxright[2]-enemy.x<40:
         if fighter.hitboxright[0]==enemy.hitbox[0]:
-            print('Hit')
-            enemy.health-=1
+            enemy.hitwidth-=1
             enemy.hit=True
+            hittime=time.time()
     elif fighter.facing=="left" and fighter.hitboxleft[0]==enemy.hitbox[0]+enemy.hitbox[2]:
-        print("hit")
-        enemy.health-=1
+        enemy.hitwidth-=1
         enemy.hit=True
+        hittime=time.time()
     else:
         enemy.hit=False
 
@@ -344,5 +376,26 @@ while running:
             enemy.attack=True
         if enemy.currentattack=="jumpattack":
             enemy.jumpattack=True
+    if enemy.hitwidth<=0:
+        enemy.dead=True
+        enemy.visible=False
+        game_over=True
+    else:
+        enemy.dead=False
+        game_over=False
+
+    if game_over==True:
+        enemy.visible=False
+        key=pygame.key.get_pressed()
+        if key[pygame.K_r]:
+            fighter=Fighter(50,620,3)
+            enemy=Enemy(800,645,1)
+            pygame.mixer.music.play(-1)
+            attackcooldown=2
+            battingcooldown=2
+            game_over=False
+            hittime_limit=3
+            currenttime=0
+            hittime=0
     update_display()
 pygame.quit()
