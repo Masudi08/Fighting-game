@@ -1,4 +1,6 @@
 import pygame
+import random
+import time
 pygame.init()
 win=pygame.display.set_mode((1280,720))
 pygame.display.set_caption("NO HARD FEELINGS😁😁")
@@ -42,9 +44,16 @@ class Fighter:
         self.kick=False
         self.kickcount=0
         self.bat=False
+        self.battingtime=0
         self.battingcount=0
+        self.hit=False
+        self.hitboxright=[self.x+25,self.y+23,30,70]
+        self.hitboxleft=[self.x+40,self.y+23,30,70]
     def draw(self):
-        pygame.draw.rect(win,(255,255,255),(self.x+25,self.y+23,30,70))
+        if self.facing=='right':
+            pygame.draw.rect(win,(255,255,255),(self.x+25,self.y+23,30,70))
+        else:
+            pygame.draw.rect(win,(255,255,255),(self.x+40,self.y+23,30,70))
         if self.jumpingcount>=32:
                 self.jumpingcount=0
         if self.walkcount>=24:
@@ -55,23 +64,41 @@ class Fighter:
             self.punchcount=0
         if self.battingcount>=44:
             self.battingcount=0
-        if self.punch==True and self.facing=="right":
+        elif self.punch==True and self.facing=="right":
             win.blit(punchright[self.punchcount//3],(self.x,self.y))
+            if  enemy.x-self.hitboxright[0]-10+self.hitboxright[2]<70 and self.punch==True:
+                self.hitboxright[0]=enemy.hitbox[0]
             self.punchcount+=1
         elif self.punch==True and self.facing=="left":
             win.blit(punchleft[self.punchcount//3],(self.x,self.y))
+            if self.x-enemy.x+enemy.hitbox[2]<70 and self.punch==True:
+                self.hitboxleft[0]=enemy.hitbox[0]+enemy.hitbox[2]
             self.punchcount+=1
         elif self.kick==True and self.facing=="right":
             win.blit(kickright[self.kickcount//3],(self.x,self.y))
+            if enemy.x-self.hitboxright[0]-10+self.hitboxright[2]<70 and self.kick==True:
+                self.hitboxright[0]=enemy.hitbox[0]
             self.kickcount+=1
         elif self.kick==True and self.facing=="left":
             win.blit(kickleft[self.kickcount//3],(self.x,self.y))
+            if self.x-enemy.x+enemy.hitbox[2]<70 and self.kick==True:
+                self.hitboxleft[0]=enemy.hitbox[0]+enemy.hitbox[2]
             self.kickcount+=1
         elif self.bat==True and self.facing=="right":
             win.blit(batright[self.battingcount//4],(self.x,self.y))
+            if self.x+self.hitboxright[2]-enemy.x<70 and self.bat==True:
+                while time.time()-fighter.battingtime>battingcooldown:
+                    self.hitboxright[0]=enemy.hitbox[0]
+                    fighter.battingtime=time.time()
+                
             self.battingcount+=1
         elif self.bat==True and self.facing=="left":
             win.blit(batleft[self.battingcount//4],(self.x,self.y))
+            if self.x-enemy.x+enemy.hitbox[2]<70 and self.bat==True:
+                while time.time()-fighter.battingtime>battingcooldown:
+                    self.hitboxleft[0]=enemy.hitbox[0]+enemy.hitbox[2]
+                    fighter.battingtime=time.time()
+                
             self.battingcount+=1
         elif self.left:
             win.blit(walkleft[self.walkcount//4],(self.x,self.y))
@@ -91,16 +118,22 @@ class Fighter:
                 win.blit(standright,(self.x,self.y))
             else:
                 win.blit(standleft,(self.x,self.y))
+            self.hitboxright[0]=self.x+25
+            enemy.hitbox[0]=enemy.x
+            self.hitboxleft[0]=self.x+40
 
 enemy_Attackright=[pygame.image.load("Attack__000.png").convert_alpha(),pygame.image.load("Attack__001.png").convert_alpha(),pygame.image.load("Attack__002.png").convert_alpha(),pygame.image.load("Attack__003.png").convert_alpha(),pygame.image.load("Attack__004.png").convert_alpha(),pygame.image.load("Attack__005.png").convert_alpha(),pygame.image.load("Attack__006.png").convert_alpha(),pygame.image.load("Attack__007.png").convert_alpha(),pygame.image.load("Attack__008.png").convert_alpha(),pygame.image.load("Attack__009.png").convert_alpha()]
 enemy_attackright=[pygame.transform.scale(frame,(50,70)) for frame in enemy_Attackright]
 enemy_attackleft=[pygame.transform.flip(frame,True,False) for frame in enemy_attackright]
-enemy_Idleright=[pygame.image.load("Idle__000.png").convert_alpha(),pygame.image.load("Idle__001.png").convert_alpha(),pygame.image.load("Idle__002.png").convert_alpha(),pygame.image.load("Idle__003.png").convert_alpha(),pygame.image.load("Idle__005.png").convert_alpha(),pygame.image.load("Idle__006.png").convert_alpha(),pygame.image.load("Idle__007.png").convert_alpha(),pygame.image.load("Idle__008.png").convert_alpha(),pygame.image.load("Idle__009.png").convert_alpha()]
+enemy_Idleright=[pygame.image.load("Idle__000.png").convert_alpha(),pygame.image.load("Idle__001.png").convert_alpha(),pygame.image.load("Idle__002.png").convert_alpha(),pygame.image.load("Idle__003.png").convert_alpha(),pygame.image.load("Idle__004.png").convert_alpha(),pygame.image.load("Idle__005.png").convert_alpha(),pygame.image.load("Idle__006.png").convert_alpha(),pygame.image.load("Idle__007.png").convert_alpha(),pygame.image.load("Idle__008.png").convert_alpha(),pygame.image.load("Idle__009.png").convert_alpha()]
 enemy_idleright=[pygame.transform.scale(frame,(50,70)) for frame in enemy_Idleright]
 enemy_idleleft=[pygame.transform.flip(frame,True,False) for frame in enemy_idleright]
 enemy_Run=[pygame.image.load("Run__000.png").convert_alpha(),pygame.image.load("Run__001.png").convert_alpha(),pygame.image.load("Run__002.png").convert_alpha(),pygame.image.load("Run__003.png").convert_alpha(),pygame.image.load("Run__004.png").convert_alpha(),pygame.image.load("Run__005.png").convert_alpha(),pygame.image.load("Run__006.png").convert_alpha(),pygame.image.load("Run__007.png").convert_alpha(),pygame.image.load("Run__008.png").convert_alpha(),pygame.image.load("Run__009.png").convert_alpha(),]
 enemy_run=[pygame.transform.scale(frame,(30,70))for frame in enemy_Run]
 enemy_runleft=[pygame.transform.flip(frame,True,False) for frame in enemy_run]
+jumpAttack_right=[pygame.image.load("Jump_Attack__000.png").convert_alpha(),pygame.image.load("Jump_Attack__001.png").convert_alpha(),pygame.image.load("Jump_Attack__002.png").convert_alpha(),pygame.image.load("Jump_Attack__003.png").convert_alpha(),pygame.image.load("Jump_Attack__004.png").convert_alpha(),pygame.image.load("Jump_Attack__005.png").convert_alpha(),pygame.image.load("Jump_Attack__006.png").convert_alpha(),pygame.image.load("Jump_Attack__007.png").convert_alpha(),pygame.image.load("Jump_Attack__008.png").convert_alpha(),pygame.image.load("Jump_Attack__009.png").convert_alpha()]
+jumpattack_right=[pygame.transform.scale(frame,(30,70))for frame in jumpAttack_right]
+jumpattack_left=[pygame.transform.flip(frame,True,False)for frame in jumpattack_right]
 class Enemy:
     def __init__(self,x,y,vel):
         self.y=y
@@ -113,33 +146,73 @@ class Enemy:
         self.facing="right"
         self.run=False
         self.runcount=0
+        self.jumpattack=False
+        self.jumpcount=10
+        self.jumpattackcount=0
+        self.startjump=self.y
+        self.currentattack=None
+        self.attacktime=0
+        self.isjumping=False
+        self.hit=False
+        self.health=20
+        self.hitbox=[self.x,self.y,45,70]
+    
+
     def draw_enemy(self):
-        pygame.draw.rect(win,(255,255,255),(self.x,self.y,25,70))
-        if self.attack_count>=36:
+        pygame.draw.rect(win,(255,255,255),(self.x,self.y,45,70))
+        if self.attack_count>=40:
+            self.attack=False
+            self.currentattack=None
             self.attack_count=0
-        if self.idlecount>=36:
+        if self.idlecount>=40:
             self.idlecount=0
-        if self.runcount>=36:
+        if self.runcount>=40:
             self.runcount=0
-        if self.idle==True and self.facing=="right":
-            win.blit(enemy_idleright[self.idlecount//4],(self.x,self.y))
-            enemy.idlecount+=1
-        elif self.idle==True and self.facing=="left":
-            win.blit(enemy_idleleft[self.idlecount//4],(self.x,self.y))  
-            enemy.idlecount+=1
-        elif self.attack==True and self.facing=="right":
+        if self.jumpattackcount>=40:
+            self.jumpattack=False
+            self.isjumping=False
+            self.currentattack=None
+            self.y=self.startjump
+            self.jumpattackcount=0
+
+        if self.attack==True and self.facing=="right":
             win.blit(enemy_attackright[self.attack_count//4],(self.x,self.y))
-            enemy.attack_count+=1
+            self.attack_count+=1
         elif self.attack==True and self.facing=="left":
             win.blit(enemy_attackleft[self.attack_count//4],(self.x,self.y))
-            enemy.attack_count+=1
+            self.attack_count+=1
+        elif self.jumpattack==True and self.facing=="right":
+            self.jump()
+            win.blit(jumpattack_right[self.jumpattackcount//4],(self.x,self.y))
+            self.jumpattackcount+=1
+        elif self.jumpattack==True and self.facing=="left":
+            self.jump()
+            win.blit(jumpattack_left[self.jumpattackcount//4],(self.x,self.y))
+            self.jumpattackcount+=1
         elif self.run==True and self.facing=="right":
             win.blit(enemy_run[self.runcount//4],(self.x,self.y)) 
-            enemy.runcount+=1
+            self.runcount+=1
         elif self.run==True and self.facing=="left":
             win.blit(enemy_runleft[self.runcount//4],(self.x,self.y)) 
-            enemy.runcount+=1
-        
+            self.runcount+=1
+        else:
+            if self.idle==True and self.facing=="right":
+                win.blit(enemy_idleright[self.idlecount//4],(self.x,self.y))
+                self.idlecount+=1
+            elif self.idle==True and self.facing=="left":
+                win.blit(enemy_idleleft[self.idlecount//4],(self.x,self.y))  
+                self.idlecount+=1
+    def jump(self):
+        if self.isjumping==True:
+            if self.jumpcount>-10:
+                neg=1
+                if self.jumpcount<1:
+                    neg=-1
+                self.y-=(enemy.jumpcount**2*0.5)*neg
+                self.jumpcount-=1
+            else:
+                self.jumpcount=10
+                self.y=enemy.startjump
         
 
     
@@ -158,6 +231,8 @@ clock=pygame.time.Clock()
 fighter=Fighter(50,620,3)
 enemy=Enemy(800,645,1)
 pygame.mixer.music.play(-1)
+attackcooldown=2
+battingcooldown=2
 while running:
     clock.tick(60)
     for event in pygame.event.get():
@@ -208,32 +283,66 @@ while running:
     elif key[pygame.K_k]:
         fighter.kick=True
     elif key[pygame.K_o]:
-        fighter.bat=True
+        while time.time()-fighter.battingtime>battingcooldown:
+            fighter.bat=True
+            fighter.battingtime=time.time()
     else:
         fighter.punch=False
         fighter.kick=False
-        fighter.bat=False    
-    enemy.attack=False
-    enemy.run=False
-    enemy.idle=False
-    if fighter.x<enemy.x:
-        enemy.facing="left"
-        if enemy.x-fighter.x>50:
-            enemy.run=True
-            enemy.x-=enemy.vel
-        if enemy.x-fighter.x<70:
-            enemy.attack=True    
-    elif fighter.x>enemy.x:
-        enemy.facing="right"
-        if fighter.x-enemy.x>50:
-            enemy.run=True
-            enemy.x+=enemy.vel
-        if fighter.x-enemy.x<70:
-            enemy.attack=True
-            
+        fighter.bat=False 
+
+    if fighter.facing=="right" and fighter.x+fighter.hitboxright[2]-enemy.x<40:
+        if fighter.hitboxright[0]==enemy.hitbox[0]:
+            print('Hit')
+            enemy.health-=1
+            enemy.hit=True
+    elif fighter.facing=="left" and fighter.hitboxleft[0]==enemy.hitbox[0]+enemy.hitbox[2]:
+        print("hit")
+        enemy.health-=1
+        enemy.hit=True
     else:
-        enemy.attack=False
-        enemy.run=False
-        enemy.idle=True
+        enemy.hit=False
+
+   
+    enemy.attack = False
+    enemy.run = False
+    enemy.idle = False
+    enemy.jumpattack = False
+
+    distance_x = abs(fighter.x - enemy.x)
+  
+    if fighter.x < enemy.x:
+        enemy.facing = "left"
+    else:
+        enemy.facing = "right"
+
+    attack_range = 70 
+    if enemy.currentattack==None:
+        if distance_x < attack_range and time.time()-enemy.attacktime>attackcooldown:
+            enemy.currentattack=random.choice(["normal","jumpattack"])
+            if enemy.currentattack=="normal":
+                enemy.attack=True
+                enemy.attackcount=0
+            elif enemy.currentattack=="jumpattack":
+                enemy.jumpattack=True
+                enemy.jumpattackcount=0
+                enemy.isjumping=True
+            enemy.attacktime=time.time()
+            enemy.idle=False
+            enemy.run=False
+        elif distance_x > 70: 
+            enemy.run = True
+            if fighter.x < enemy.x:
+                enemy.x -= enemy.vel
+            else:
+                enemy.x += enemy.vel
+        else: 
+            enemy.idle = True
+        
+    else:
+        if enemy.currentattack=="normal":
+            enemy.attack=True
+        if enemy.currentattack=="jumpattack":
+            enemy.jumpattack=True
     update_display()
 pygame.quit()
